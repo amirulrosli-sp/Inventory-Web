@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Inventory App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2><i class="fas fa-user-plus"></i> Register</h2>
+      </div>
+      
+      <form class="auth-form" onsubmit="event.preventDefault(); handleRegister();">
+        <div class="input-group">
+          <label for="newUsername">Username</label>
+          <input type="text" id="newUsername" placeholder="Choose username" required>
+        </div>
+        
+        <div class="input-group">
+          <label for="newPassword">Password</label>
+          <input type="password" id="newPassword" placeholder="Create password" required>
+          <div class="password-hint">
+            Password should be at least 8 characters
+          </div>
+        </div>
+        
+        <button type="submit" class="auth-btn">Register</button>
+        
+        <p id="error" class="error-message"></p>
+        
+        <div class="auth-footer">
+          Already have an account? <a href="index.html">Login here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="notification-toast" class="notification-toast"></div>
+
+  <script src="notifications.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    function handleRegister() {
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value;
+      const errorElement = document.getElementById('error');
+
+      // Clear previous errors
+      errorElement.textContent = '';
+
+      // Basic client-side validation
+      if (!username) {
+        showNotification('Username is required', true);
+        errorElement.textContent = 'Username is required';
+        return;
+      }
+
+      if (password.length < 8) {
+        showNotification('Password must be at least 8 characters', true);
+        errorElement.textContent = 'Password must be at least 8 characters';
+        return;
+      }
+
+      try {
+        if (window.auth.register(username, password)) {
+          showNotification('Registration successful! Please login.');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        } else {
+          showNotification('Username already exists', true);
+          errorElement.textContent = 'Username already exists';
+        }
+      } catch (error) {
+        showNotification('Registration failed. Please try again.', true);
+        errorElement.textContent = 'Registration failed. Please try again.';
+        console.error('Registration error:', error);
+      }
+    }
+
+    // Initialize the system when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      window.auth.initUsers();
+    });
+  </script>
+</body>
+</html>

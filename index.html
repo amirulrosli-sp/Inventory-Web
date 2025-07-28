@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Inventory App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+      </div>
+
+      <form class="auth-form" id="loginForm">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="auth-btn" id="loginBtn">Login</button>
+        <p id="error" class="error-message"></p>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="register.html">Register here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="notification-toast" class="notification-toast"></div>
+
+  <script src="notifications.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      function checkAuthReady() {
+        return window.auth &&
+               typeof window.auth.initUsers === 'function' &&
+               typeof window.auth.login === 'function' &&
+               typeof window.auth.getCurrentUser === 'function';
+      }
+
+      function initializeAuth() {
+        if (!checkAuthReady()) {
+          setTimeout(initializeAuth, 100);
+          return;
+        }
+
+        try {
+          window.auth.initUsers();
+          setupEventListeners();
+        } catch (error) {
+          document.getElementById('error').textContent = 'System error. Please refresh.';
+        }
+      }
+
+      function setupEventListeners() {
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+
+        loginForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          handleLogin();
+        });
+
+        document.getElementById('username').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('password').focus();
+          }
+        });
+
+        document.getElementById('password').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            loginBtn.click();
+          }
+        });
+      }
+
+      function handleLogin() {
+        const btn = document.getElementById('loginBtn');
+        const errorElement = document.getElementById('error');
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        btn.disabled = true;
+        btn.classList.add('loading');
+        errorElement.textContent = '';
+
+        if (!username || !password) {
+          errorElement.textContent = 'Please enter both username and password';
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          return;
+        }
+
+        try {
+          if (window.auth.login(username, password)) {
+            const user = window.auth.getCurrentUser();
+            window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+          } else {
+            errorElement.textContent = 'Invalid username or password';
+            document.getElementById('password').value = '';
+          }
+        } catch (error) {
+          errorElement.textContent = 'Login failed. Please try again.';
+          console.error('Login error:', error);
+        } finally {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+        }
+      }
+
+      initializeAuth();
+    });
+  </script>
+</body>
+</html>

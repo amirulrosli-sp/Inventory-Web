@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Out - Inventory App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="header-title">
+        <button class="back-btn" onclick="location.href='dashboard.html'">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <h2>Stock Out</h2>
+      </div>
+      <span id="userInfo" class="user-info"></span>
+    </div>
+    <div class="header-controls">
+      <div class="button-group">
+        <button id="adminBtn" class="admin-btn" onclick="location.href='admin.html'" style="display: none;">
+          <i class="fas fa-user-cog"></i> Admin
+        </button>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <div class="toggle-switch">
+          <div class="toggle-knob">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <div class="input-group">
+      <label for="item">Item Name</label>
+      <div class="dropdown-container">
+        <div class="dropdown-header" id="itemDropdownHeader" onclick="toggleDropdown()">
+          <span id="selectedItem">Select item</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <input type="hidden" id="item">  
+        <div class="dropdown-list" id="itemDropdown">
+          <div class="dropdown-search">
+            <input type="text" placeholder="Search items..." id="itemSearch" oninput="filterItems()">
+          </div>
+          <div id="dropdownItems"></div>
+        </div>
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="qty">Quantity</label>
+      <input id="qty" type="number" placeholder="Enter quantity" required>
+    </div>
+    <div class="input-group">
+      <label for="person">Taken By</label>
+      <input id="person" placeholder="Enter recipient name" required>
+    </div>
+    <div class="input-group">
+      <label for="reason">Reason (Optional)</label>
+      <input id="reason" placeholder="Enter reason">
+    </div>
+  </div>
+
+<div class="search-container">
+  <div class="search-wrapper">
+    <input id="search" placeholder="Search records..." oninput="loadData()">
+    <button class="calendar-btn" onclick="toggleDateFilter()">
+      <i class="fas fa-calendar-alt"></i>
+    </button>
+  </div>
+</div>
+
+<div id="dateFilterModal" class="modal date-filter-modal">
+  <div class="modal-content">
+    <!-- Calendar Header with Centered Month Title -->
+    <div class="simple-date-header">
+      <button class="month-nav" onclick="changeMonth(-1)">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div class="simple-date-title" id="calendarMonthTitle">July 2025</div>
+      <button class="month-nav" onclick="changeMonth(1)">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    
+    <!-- Date Range Display -->
+    <div class="date-range-display">
+      <div id="selectedRangeText">Select a date range by clicking start and end dates</div>
+    </div>
+    
+    <!-- Calendar Grid -->
+    <div class="simple-date-grid">
+      <!-- Day Headers -->
+      <div class="simple-date-day-header">M</div>
+      <div class="simple-date-day-header">Tu</div>
+      <div class="simple-date-day-header">W</div>
+      <div class="simple-date-day-header">Th</div>
+      <div class="simple-date-day-header">F</div>
+      <div class="simple-date-day-header">Sa</div>
+      <div class="simple-date-day-header">Su</div>
+      
+      <!-- Calendar Days (will be populated by JavaScript) -->
+      <div class="simple-date-day other-month">30</div>
+      <div class="simple-date-day">1</div>
+      <div class="simple-date-day">2</div>
+      <div class="simple-date-day">3</div>
+      <div class="simple-date-day">4</div>
+      <div class="simple-date-day">5</div>
+      <div class="simple-date-day">6</div>
+      
+      <div class="simple-date-day">7</div>
+      <div class="simple-date-day">8</div>
+      <div class="simple-date-day">9</div>
+      <div class="simple-date-day">10</div>
+      <div class="simple-date-day">11</div>
+      <div class="simple-date-day">12</div>
+      <div class="simple-date-day">13</div>
+      
+      <div class="simple-date-day">14</div>
+      <div class="simple-date-day">15</div>
+      <div class="simple-date-day">16</div>
+      <div class="simple-date-day">17</div>
+      <div class="simple-date-day">18</div>
+      <div class="simple-date-day">19</div>
+      <div class="simple-date-day">20</div>
+      
+      <div class="simple-date-day">21</div>
+      <div class="simple-date-day">22</div>
+      <div class="simple-date-day">23</div>
+      <div class="simple-date-day">24</div>
+      <div class="simple-date-day">25</div>
+      <div class="simple-date-day">26</div>
+      <div class="simple-date-day">27</div>
+      
+      <div class="simple-date-day">28</div>
+      <div class="simple-date-day">29</div>
+      <div class="simple-date-day">30</div>
+      <div class="simple-date-day">31</div>
+      <div class="simple-date-day other-month">1</div>
+      <div class="simple-date-day other-month">2</div>
+      <div class="simple-date-day other-month">3</div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="calendar-actions">
+      <button class="calendar-btn cancel" onclick="clearDateFilter()">Clear</button>
+      <button class="calendar-btn ok" onclick="applyDateFilter()">OK</button>
+    </div>
+  </div>
+</div>
+
+  <div class="section-title">Stock Out Records</div>
+  <div class="stock-in-container">
+    <table id="stock-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Person</th>
+          <th>Reason</th>
+          <th class="date-column">Date</th>
+          <th class="time-column">Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="7" class="empty-state">No stock out records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="fab" onclick="addStockOut()">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <div class="tab-bar">
+    <button onclick="location.href='dashboard.html'" class="tab-item">
+      <i class="fas fa-home"></i>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="location.href='stock_in.html'" class="tab-item">
+      <i class="fas fa-arrow-down"></i>
+      <span>Stock In</span>
+    </button>
+    <button onclick="location.href='stock_out.html'" class="tab-item active">
+      <i class="fas fa-arrow-up"></i>
+      <span>Stock Out</span>
+    </button>
+  </div>
+
+  <!-- Notification Bell -->
+  <div class="notification-bell">
+    <i class="fas fa-bell"></i>
+    <div class="badge"></div>
+  </div>
+
+  <!-- Notification Center -->
+  <div class="notification-center">
+    <div class="notification-header">
+      <h3>Notifications</h3>
+      <button class="clear-all-btn" onclick="clearAllNotifications()">Clear All</button>
+    </div>
+    <div class="notification-content"></div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="notifications.js"></script>
+  <script src="stock_out.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const user = JSON.parse(currentUser);
+      document.getElementById('userInfo').textContent = `${user.username} (${user.role})`;
+      
+      if (user.role === 'admin') {
+        document.getElementById('adminBtn').style.display = 'block';
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
